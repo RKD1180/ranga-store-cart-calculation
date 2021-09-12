@@ -1,31 +1,65 @@
+// load data from api
 const loadProducts = () => {
   const url = `https://fakestoreapi.com/products`;
+
   fetch(url)
     .then((response) => response.json())
     .then((data) => showProducts(data));
 };
 loadProducts();
 
-// show all product in UI 
+// show all product in UI
 const showProducts = (products) => {
   const allProducts = products.map((pd) => pd);
   for (const product of allProducts) {
-    const image = product.images;
+    const image = product.image;
     const div = document.createElement("div");
     div.classList.add("product");
-    div.innerHTML = `<div class="single-product">
-      <div>
-    <img class="product-image" src=${image}></img>
+    div.innerHTML = `
+
+    <div class="card shadow-lg single-product" style="width: 25rem;">
+      <img src=${image} class="card-img-top product-image" alt="...">
+      <div class="card-body">
+        <h5 class="card-title">${product.title}</h5>
+        <p class="card-text"> Category: ${product.category}</p>
+        <p class="card-text"> Rating: ${product.rating.rate}</p>
+        <p class="card-text"> Response: ${product.rating.count}.</p>
+        <h2>Price: $ ${product.price}</h2>
+        <button onclick="addToCart(${product.id},${product.price})" id="addToCart-btn" class="buy-now btn btn-success">add to cart</button>
+      <button id="details-btn" onclick="loadDetail(${product.id})" class="btn btn-danger">Details</button>
       </div>
-      <h3>${product.title}</h3>
-      <p>Category: ${product.category}</p>
-      <h2>Price: $ ${product.price}</h2>
-      <button onclick="addToCart(${product.id},${product.price})" id="addToCart-btn" class="buy-now btn btn-success">add to cart</button>
-      <button id="details-btn" class="btn btn-danger">Details</button></div>
+    </div>
+
       `;
     document.getElementById("all-products").appendChild(div);
   }
 };
+// load single product details from api
+const loadDetail = (id) => {
+  const url = `https://fakestoreapi.com/products/${id}`;
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => showDetail(data));
+};
+
+// show single product details
+const showDetail = (product) => {
+  const detail = document.getElementById("pd-details");
+  detail.innerHTML = `
+  <div class="card" style="width: 18rem">
+  <img src=${product.image} class="card-img-top singlepd-img" alt="..." />
+  <div class="card-body">
+  <h5 class="card-title">${product.title}</h5>
+  <p class="card-text"> Category: ${product.category}</p>
+  <p class="card-text"> Rating: ${product.rating.rate}</p>
+  <p class="card-text"> Response: ${product.rating.count}.</p>
+  <h2>Price: $ ${product.price}</h2>
+  </div>
+</div>
+  
+  `;
+};
+// add to cart section
 let count = 0;
 const addToCart = (id, price) => {
   count = count + 1;
@@ -33,11 +67,12 @@ const addToCart = (id, price) => {
 
   updateTaxAndCharge();
   document.getElementById("total-Products").innerText = count;
+  updateTotal();
 };
 
 const getInputValue = (id) => {
   const element = document.getElementById(id).innerText;
-  const converted = parseInt(element);
+  const converted = parseFloat(element);
   return converted;
 };
 
@@ -45,8 +80,10 @@ const getInputValue = (id) => {
 const updatePrice = (id, value) => {
   const convertedOldPrice = getInputValue(id);
   const convertPrice = parseFloat(value);
-  const total = convertedOldPrice + convertPrice;
-  document.getElementById(id).innerText = Math.round(total);
+
+  const total = parseFloat(convertedOldPrice + convertPrice);
+
+  document.getElementById(id).innerText = total.toFixed(2);
 };
 
 // set innerText function
@@ -74,7 +111,9 @@ const updateTaxAndCharge = () => {
 //grandTotal update function
 const updateTotal = () => {
   const grandTotal =
-    getInputValue("price") + getInputValue("delivery-charge") +
+    getInputValue("price") +
+    getInputValue("delivery-charge") +
     getInputValue("total-tax");
-  document.getElementById("total").innerText = grandTotal;
+
+  document.getElementById("total").innerText = grandTotal.toFixed(2);
 };
